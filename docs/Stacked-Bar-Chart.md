@@ -68,6 +68,9 @@ These are the customisation options specific to StackedBar charts. These options
 	//Number - Spacing between each of the X value sets
 	barValueSpacing : 5,
 
+	//Boolean - Whether bars should be rendered on a percentage base
+	relativeBars : false,
+
 	{% raw %}
 	//String - A legend template
 	legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
