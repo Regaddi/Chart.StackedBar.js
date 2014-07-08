@@ -44,12 +44,7 @@
 			this.ScaleClass = Chart.Scale.extend({
 				offsetGridLines : true,
 				calculateBarX : function(datasetCount, datasetIndex, barIndex){
-					//Reusable method for calculating the xPosition of a given bar based on datasetIndex & width of the bar
-					var xWidth = this.calculateBaseWidth(),
-						xAbsolute = this.calculateX(barIndex) - (xWidth/2),
-						barWidth = this.calculateBarWidth(datasetCount);
-
-					return xAbsolute + barWidth;
+					return this.calculateX(barIndex);
 				},
 				calculateBarY : function(datasets, dsIndex, barIndex, value){
 					var offset = 0,
@@ -80,9 +75,7 @@
 				},
 				calculateBarWidth : function(datasetCount){
 					//The padding between datasets is to the right of each bar, providing that there are more than 1 dataset
-					var baseWidth = this.calculateBaseWidth();
-
-					return (baseWidth / (datasetCount - 1));
+					return this.calculateBaseWidth();
 				},
 				calculateBarHeight : function(datasets, dsIndex, barIndex, value) {
 					var sum = 0;
