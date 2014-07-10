@@ -43,7 +43,7 @@
 
 			this.ScaleClass = Chart.Scale.extend({
 				offsetGridLines : true,
-				calculateBarX : function(datasetCount, datasetIndex, barIndex){
+				calculateBarX : function(barIndex){
 					return this.calculateX(barIndex);
 				},
 				calculateBarY : function(datasets, dsIndex, barIndex, value){
@@ -157,7 +157,7 @@
 					base: this.scale.endPoint,
 					height: 0,
 					width : this.scale.calculateBarWidth(this.datasets.length),
-					x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index),
+					x: this.scale.calculateBarX(index),
 					y: this.scale.endPoint
 				});
 				bar.save();
@@ -272,7 +272,7 @@
 					this.datasets[datasetIndex].bars.push(new this.BarClass({
 						value : value,
 						label : label,
-						x: this.scale.calculateBarX(this.datasets.length, datasetIndex, this.scale.valuesCount+1),
+						x: this.scale.calculateBarX(this.scale.valuesCount+1),
 						y: this.scale.endPoint,
 						width : this.scale.calculateBarWidth(this.datasets.length),
 						base : this.scale.endPoint,
@@ -322,7 +322,7 @@
 					//Transition then draw
 					bar.transition({
 						base : this.scale.endPoint - (Math.abs(height) - Math.abs(y)),
-						x : this.scale.calculateBarX(this.datasets.length, datasetIndex, index),
+						x : this.scale.calculateBarX(index),
 						y : Math.abs(y),
 						height : Math.abs(height),
 						width : this.scale.calculateBarWidth(this.datasets.length)
