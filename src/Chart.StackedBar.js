@@ -29,6 +29,9 @@
 		//Boolean - Whether bars should be rendered on a percentage base
 		relativeBars : false,
 
+		// Boolean - Whether bars should only plot as high as the max value have smaller values fill less
+		maxBars: false,
+		
 		//String - A legend template
 		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
 
@@ -47,21 +50,22 @@
 					return this.calculateX(barIndex);
 				},
 				calculateBarY : function(datasets, dsIndex, barIndex, value){
-					var offset = 0,
-						sum = 0;
+					var i;
+					var offset = 0;
 
-					for(var i = 0; i < datasets.length; i++) {
-						sum += datasets[i].bars[barIndex].value;
-					}
 					for(i = dsIndex; i < datasets.length; i++) {
 						if(i === dsIndex && value) {
-							offset += value;
+							offset = options.maxBars ? Math.max( offset, value ) : offset + value;
 						} else {
-							offset += datasets[i].bars[barIndex].value;
+							offset = options.maxBars ? Math.max( offset, datasets[i].bars[barIndex].value ) : offset + datasets[i].bars[barIndex].value;
 						}
 					}
-
-					if(options.relativeBars) {
+					
+					if (options.relativeBars) {
+						var sum = 0;
+						for(i = 0; i < datasets.length; i++) {
+							sum += datasets[i].bars[barIndex].value;
+						}
 						offset = offset / sum * 100;
 					}
 
@@ -78,17 +82,18 @@
 					return this.calculateBaseWidth();
 				},
 				calculateBarHeight : function(datasets, dsIndex, barIndex, value) {
-					var sum = 0;
-
-					for(var i = 0; i < datasets.length; i++) {
-						sum += datasets[i].bars[barIndex].value;
-					}
 
 					if(!value) {
 						value = datasets[dsIndex].bars[barIndex].value;
 					}
 
 					if(options.relativeBars) {
+						var sum = 0;
+
+						for(var i = 0; i < datasets.length; i++) {
+							sum += datasets[i].bars[barIndex].value;
+						}
+						
 						value = value / sum * 100;
 					}
 
@@ -211,6 +216,8 @@
 						if(!values[barIndex]) values[barIndex] = 0;
 						if(self.options.relativeBars) {
 							values[barIndex] = 100;
+						} else if ( self.options.maxBars ) {
+							values[barIndex] = Math.max( values[barIndex], bar.value );
 						} else {
 							values[barIndex] += bar.value;
 						}
