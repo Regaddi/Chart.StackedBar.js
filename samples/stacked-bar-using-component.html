@@ -41,12 +41,9 @@
     ]
   };
   window.onload = function(){
-    // window.Chart = Chart = require('chart');
-    console.log(Chart);
     require('stacked-bar')
     var ctx = document.getElementById("canvas").getContext("2d");
     window.myBar = new Chart(ctx);
-    console.log(window.myBar);
     window.myBar.StackedBar(barChartData, {
       responsive : true
     });
