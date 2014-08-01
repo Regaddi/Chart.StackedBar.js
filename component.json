@@ -1,0 +1,23 @@
+{
+  "name": "stacked-bar",
+  "repo": "fredsterss/Chart.StackedBar.js",
+  "description": "Stacked bar for component/chart",
+  "version": "0.0.1",
+  "keywords": [
+    "bar chart"
+  ],
+  "dependencies": {},
+  "development": {
+    "component/chart": "*"
+  },
+  "license": "MIT",
+  "main": "src/Chart.StackedBar.js",
+  "scripts": [
+    "src/Chart.StackedBar.js"
+  ],
+  "remotes": [
+    "https://raw.githubusercontent.com",
+    "https://cdn.rawgit.com",
+    "https://rawgit.com"
+  ]
+}
