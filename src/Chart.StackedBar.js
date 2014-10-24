@@ -241,7 +241,7 @@
 					);
 					helpers.extend(this, updatedRanges);
 				},
-				xLabels : labels,
+				xLabels : this.options.xLabels || labels,
 				font : helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
 				lineWidth : this.options.scaleLineWidth,
 				lineColor : this.options.scaleLineColor,
