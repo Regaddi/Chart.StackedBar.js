@@ -30,8 +30,16 @@
 		relativeBars : false,
 
 		//String - A legend template
-		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
 
+		//Boolean - Show total legend
+		showTotal: false,
+
+		//String - Color of total legend
+		totalColor: '#fff',
+
+		//String - Total Label
+		totalLabel: 'Total'
 	};
 
 	Chart.Type.extend({
@@ -164,6 +172,162 @@
 			}, this);
 
 			this.render();
+		},
+		showTooltip : function(ChartElements, forceRedraw){
+			// Only redraw the chart if we've actually changed what we're hovering on.
+			if (typeof this.activeElements === 'undefined') this.activeElements = [];
+
+			helpers = Chart.helpers;
+
+			var isChanged = (function(Elements){
+				var changed = false;
+
+				if (Elements.length !== this.activeElements.length){
+					changed = true;
+					return changed;
+				}
+
+				helpers.each(Elements, function(element, index){
+					if (element !== this.activeElements[index]){
+						changed = true;
+					}
+				}, this);
+				return changed;
+			}).call(this, ChartElements);
+
+			if (!isChanged && !forceRedraw){
+				return;
+			}
+			else{
+				this.activeElements = ChartElements;
+			}
+			this.draw();
+			if(this.options.customTooltips){
+				this.options.customTooltips(false);
+			}
+			if (ChartElements.length > 0){
+				// If we have multiple datasets, show a MultiTooltip for all of the data points at that index
+				if (this.datasets && this.datasets.length > 1) {
+					var dataArray,
+					dataIndex;
+
+					for (var i = this.datasets.length - 1; i >= 0; i--) {
+						dataArray = this.datasets[i].points || this.datasets[i].bars || this.datasets[i].segments;
+						dataIndex = helpers.indexOf(dataArray, ChartElements[0]);
+						if (dataIndex !== -1){
+							break;
+						}
+					}
+					var tooltipLabels = [],
+					tooltipColors = [],
+					medianPosition = (function(index) {
+
+						// Get all the points at that particular index
+						var Elements = [],
+						dataCollection,
+						xPositions = [],
+						yPositions = [],
+						xMax,
+						yMax,
+						xMin,
+						yMin;
+						helpers.each(this.datasets, function(dataset){
+							dataCollection = dataset.points || dataset.bars || dataset.segments;
+							if (dataCollection[dataIndex] && dataCollection[dataIndex].hasValue()){
+								Elements.push(dataCollection[dataIndex]);
+							}
+						});
+
+						var total = {
+							datasetLabel: this.options.totalLabel,
+							value: 0,
+							fillColor: this.options.totalColor,
+							strokeColor: this.options.totalColor
+						};
+
+						helpers.each(Elements, function(element) {
+							xPositions.push(element.x);
+							yPositions.push(element.y);
+
+							total.value += element.value;
+
+							//Include any colour information about the element
+							tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
+							tooltipColors.push({
+								fill: element._saved.fillColor || element.fillColor,
+								stroke: element._saved.strokeColor || element.strokeColor
+							});
+
+						}, this);
+
+						if (this.options.showTotal) {
+							tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, total));
+							tooltipColors.push({
+								fill: total.fillColor,
+								stroke: total.strokeColor
+							});
+						}
+
+						yMin = helpers.min(yPositions);
+						yMax = helpers.max(yPositions);
+
+						xMin = helpers.min(xPositions);
+						xMax = helpers.max(xPositions);
+
+						return {
+							x: (xMin > this.chart.width/2) ? xMin : xMax,
+							y: (yMin + yMax)/2
+						};
+					}).call(this, dataIndex);
+
+					new Chart.MultiTooltip({
+						x: medianPosition.x,
+						y: medianPosition.y,
+						xPadding: this.options.tooltipXPadding,
+						yPadding: this.options.tooltipYPadding,
+						xOffset: this.options.tooltipXOffset,
+						fillColor: this.options.tooltipFillColor,
+						textColor: this.options.tooltipFontColor,
+						fontFamily: this.options.tooltipFontFamily,
+						fontStyle: this.options.tooltipFontStyle,
+						fontSize: this.options.tooltipFontSize,
+						titleTextColor: this.options.tooltipTitleFontColor,
+						titleFontFamily: this.options.tooltipTitleFontFamily,
+						titleFontStyle: this.options.tooltipTitleFontStyle,
+						titleFontSize: this.options.tooltipTitleFontSize,
+						cornerRadius: this.options.tooltipCornerRadius,
+						labels: tooltipLabels,
+						legendColors: tooltipColors,
+						legendColorBackground : this.options.multiTooltipKeyBackground,
+						title: ChartElements[0].label,
+						chart: this.chart,
+						ctx: this.chart.ctx,
+						custom: this.options.customTooltips
+					}).draw();
+
+				} else {
+					each(ChartElements, function(Element) {
+						var tooltipPosition = Element.tooltipPosition();
+						new Chart.Tooltip({
+							x: Math.round(tooltipPosition.x),
+							y: Math.round(tooltipPosition.y),
+							xPadding: this.options.tooltipXPadding,
+							yPadding: this.options.tooltipYPadding,
+							fillColor: this.options.tooltipFillColor,
+							textColor: this.options.tooltipFontColor,
+							fontFamily: this.options.tooltipFontFamily,
+							fontStyle: this.options.tooltipFontStyle,
+							fontSize: this.options.tooltipFontSize,
+							caretHeight: this.options.tooltipCaretSize,
+							cornerRadius: this.options.tooltipCornerRadius,
+							text: template(this.options.tooltipTemplate, Element),
+							chart: this.chart,
+							custom: this.options.customTooltips
+						}).draw();
+					}, this);
+				}
+			}
+			return this;
 		},
 		update : function(){
 			this.scale.update();
