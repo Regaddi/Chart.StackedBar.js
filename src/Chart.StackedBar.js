@@ -306,7 +306,7 @@
 					}).draw();
 
 				} else {
-					each(ChartElements, function(Element) {
+					helpers.each(ChartElements, function(Element) {
 						var tooltipPosition = Element.tooltipPosition();
 						new Chart.Tooltip({
 							x: Math.round(tooltipPosition.x),
@@ -320,7 +320,7 @@
 							fontSize: this.options.tooltipFontSize,
 							caretHeight: this.options.tooltipCaretSize,
 							cornerRadius: this.options.tooltipCornerRadius,
-							text: template(this.options.tooltipTemplate, Element),
+							text: helpers.template(this.options.tooltipTemplate, Element),
 							chart: this.chart,
 							custom: this.options.customTooltips
 						}).draw();
