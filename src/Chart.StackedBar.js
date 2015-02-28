@@ -65,7 +65,7 @@
 						if(i === dsIndex && value) {
 							offset += value;
 						} else {
-							offset += datasets[i].bars[barIndex].value;
+							offset = +offset + +datasets[i].bars[barIndex].value;
 						}
 					}
 
@@ -376,7 +376,7 @@
 						if(self.options.relativeBars) {
 							values[barIndex] = 100;
 						} else {
-							values[barIndex] += bar.value;
+							values[barIndex] = +values[barIndex] + +bar.value;
 						}
 					});
 				});
