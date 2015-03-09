@@ -144,8 +144,9 @@
 				helpers.each(dataset.data,function(dataPoint,index){
 					if (helpers.isNumber(dataPoint)){
 						//Add a new point for each piece of data, passing any required data to draw.
+						//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip) 
 						datasetObject.bars.push(new this.BarClass({
-							value : dataPoint,
+							value : helpers.isNumber(dataPoint)?dataPoint:0,
 							label : data.labels[index],
 							datasetLabel: dataset.label,
 							strokeColor : dataset.strokeColor,
@@ -433,8 +434,9 @@
 			helpers.each(valuesArray,function(value,datasetIndex){
 				if (helpers.isNumber(value)){
 					//Add a new point for each piece of data, passing any required data to draw.
+					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip) 
 					this.datasets[datasetIndex].bars.push(new this.BarClass({
-						value : value,
+						value : helpers.isNumber(value)?value:0,
 						label : label,
 						x: this.scale.calculateBarX(this.scale.valuesCount+1),
 						y: this.scale.endPoint,
