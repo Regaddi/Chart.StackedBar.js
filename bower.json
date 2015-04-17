@@ -5,7 +5,7 @@
   "homepage": "https://github.com/nnnick/Chart.js",
   "author": "Regaddi",
   "main": [
-    "Chart.StackedBar.js"
+    "src/Chart.StackedBar.js"
   ],
   "dependencies": {
     "Chart.js": ">= 1.0.0-beta"
