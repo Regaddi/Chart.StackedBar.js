@@ -11,6 +11,7 @@
   "dependences": {
     "Chart.js": ">= 1.0.0-beta"
   },
+  "main": "src/Chart.StackedBar.js",
   "devDependencies": {
     "gulp": "3.5.x",
     "gulp-concat": "~2.1.x",
