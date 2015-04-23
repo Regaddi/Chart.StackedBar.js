@@ -1,9 +1,19 @@
-(function(){
+(function (factory) {
+	"use strict";
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['chart.js'], factory);
+	} else if (typeof exports === 'object') {
+		// Node/CommonJS
+		module.exports = factory(require('chart.js'));
+	} else {
+		// Global browser
+		factory(Chart);
+	}
+}(function (Chart) {
 	"use strict";
 
-	var root = this,
-		Chart = root.Chart,
-		helpers = Chart.helpers;
+	var helpers = Chart.helpers;
 
 	var defaultConfig = {
 		scaleBeginAtZero : true,
@@ -150,7 +160,7 @@
 				helpers.each(dataset.data,function(dataPoint,index){
 					if (helpers.isNumber(dataPoint)){
 						//Add a new point for each piece of data, passing any required data to draw.
-						//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip) 
+						//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
 						datasetObject.bars.push(new this.BarClass({
 							value : helpers.isNumber(dataPoint)?dataPoint:0,
 							label : data.labels[index],
@@ -442,7 +452,7 @@
 			helpers.each(valuesArray,function(value,datasetIndex){
 				if (helpers.isNumber(value)){
 					//Add a new point for each piece of data, passing any required data to draw.
-					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip) 
+					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
 					this.datasets[datasetIndex].bars.push(new this.BarClass({
 						value : helpers.isNumber(value)?value:0,
 						label : label,
@@ -505,4 +515,4 @@
 			},this);
 		}
 	});
-}).call(this);
+}));
