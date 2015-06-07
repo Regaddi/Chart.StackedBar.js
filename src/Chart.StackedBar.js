@@ -55,7 +55,10 @@
 		totalColor: '#fff',
 
 		//String - Total Label
-		totalLabel: 'Total'
+		totalLabel: 'Total',
+
+		//Boolean - Hide labels with value set to 0
+		tooltipHideZero: false
 	};
 
 	Chart.Type.extend({
@@ -263,6 +266,10 @@
 						};
 
 						helpers.each(Elements, function(element) {
+							if (this.options.tooltipHideZero && element.value === 0) {
+								return;
+							}
+
 							xPositions.push(element.x);
 							yPositions.push(element.y);
 
