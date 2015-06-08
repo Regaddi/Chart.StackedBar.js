@@ -161,19 +161,20 @@
 				this.datasets.push(datasetObject);
 
 				helpers.each(dataset.data,function(dataPoint,index){
-					if (helpers.isNumber(dataPoint)){
-						//Add a new point for each piece of data, passing any required data to draw.
-						//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
-						datasetObject.bars.push(new this.BarClass({
-							value : helpers.isNumber(dataPoint)?dataPoint:0,
-							label : data.labels[index],
-							datasetLabel: dataset.label,
-							strokeColor : dataset.strokeColor,
-							fillColor : dataset.fillColor,
-							highlightFill : dataset.highlightFill || dataset.fillColor,
-							highlightStroke : dataset.highlightStroke || dataset.strokeColor
-						}));
+					if(!helpers.isNumber(dataPoint)){
+						dataPoint = 0;
 					}
+					//Add a new point for each piece of data, passing any required data to draw.
+					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
+					datasetObject.bars.push(new this.BarClass({
+						value : dataPoint,
+						label : data.labels[index],
+						datasetLabel: dataset.label,
+						strokeColor : dataset.strokeColor,
+						fillColor : dataset.fillColor,
+						highlightFill : dataset.highlightFill || dataset.fillColor,
+						highlightStroke : dataset.highlightStroke || dataset.strokeColor
+					}));
 				},this);
 
 			},this);
