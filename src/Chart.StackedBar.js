@@ -540,13 +540,15 @@
 						height = this.scale.calculateBarHeight(this.datasets, datasetIndex, index, bar.value);
 
 					//Transition then draw
-					bar.transition({
-						base : this.scale.endPoint - (Math.abs(height) - Math.abs(y)),
-						x : this.scale.calculateBarX(index),
-						y : Math.abs(y),
-						height : Math.abs(height),
-						width : this.scale.calculateBarWidth(this.datasets.length)
-					}, easingDecimal).draw();
+					if(bar.value > 0) {
+						bar.transition({
+							base : this.scale.endPoint - (Math.abs(height) - Math.abs(y)),
+							x : this.scale.calculateBarX(index),
+							y : Math.abs(y),
+							height : Math.abs(height),
+							width : this.scale.calculateBarWidth(this.datasets.length)
+						}, easingDecimal).draw();
+					}
 				},this);
 			},this);
 		}
