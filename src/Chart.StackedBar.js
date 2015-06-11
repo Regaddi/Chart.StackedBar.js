@@ -399,7 +399,7 @@
 				helpers.each(dataset.bars, callback, this, datasetIndex);
 			},this);
 		},
-		getBarsAtEvent : function(e){
+		getBarsAtEvent : function(e, single){
 			var barsArray = [],
 				eventPosition = helpers.getRelativePosition(e),
 				datasetIterator = function(dataset){
@@ -410,13 +410,21 @@
 			for (var datasetIndex = 0; datasetIndex < this.datasets.length; datasetIndex++) {
 				for (barIndex = 0; barIndex < this.datasets[datasetIndex].bars.length; barIndex++) {
 					if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x,eventPosition.y)){
-						helpers.each(this.datasets, datasetIterator);
+						if (single) {
+							barsArray.push(this.datasets[datasetIndex].bars[barIndex]);
+						}
+						else {
+							helpers.each(this.datasets, datasetIterator);
+						}
 						return barsArray;
 					}
 				}
 			}
 
 			return barsArray;
+		},
+		getBarAtEvent : function(e){
+			return this.getBarsAtEvent(e, true)[0] || null;
 		},
 		buildScale : function(labels){
 			var self = this;
