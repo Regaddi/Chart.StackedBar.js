@@ -15,31 +15,49 @@
 
 	<script>
 	var randomScalingFactor = function(){ return Math.round(Math.random()*100)};
+	var randomErrorFactor = function(data){ return Math.round(data*.7*Math.random())};
 	var randomColorFactor = function(){ return Math.round(Math.random()*255)};
 
+	var randomizeData = function(){
+		randomData = {'data0':[],'dataError':[],'data1':[],'data2':[]};
+		for(var x=0; x<labels.length; x++){
+			var tmpRandom = randomScalingFactor();
+			randomData.data0.push(tmpRandom);
+			randomData.dataError.push(randomErrorFactor(tmpRandom));
+			randomData.data1.push(randomScalingFactor());
+			randomData.data2.push(randomScalingFactor());
+		}
+	};
+	
+	var labels = ["January","February","March","April","May","June","July"];
+	var randomData;
+	randomizeData();
+	
+	
 	var barChartData = {
-		labels : ["January","February","March","April","May","June","July"],
+		labels : labels,
 		datasets : [
 			{
 				fillColor : "rgba(220,220,220,0.5)",
 				strokeColor : "rgba(220,220,220,0.8)",
 				highlightFill: "rgba(220,220,220,0.75)",
 				highlightStroke: "rgba(220,220,220,1)",
-				data : [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()]
+				data : randomData.data0,
+				error : randomData.dataError
 			},
 			{
 				fillColor : "rgba(151,187,205,0.5)",
 				strokeColor : "rgba(151,187,205,0.8)",
 				highlightFill : "rgba(151,187,205,0.75)",
 				highlightStroke : "rgba(151,187,205,1)",
-				data : [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()]
+				data : randomData.data1
 			},
 			{
 				fillColor : "rgba(240,73,73,0.5)",
 				strokeColor : "rgba(240,73,73,0.8)",
 				highlightFill : "rgba(240,73,73,0.75)",
 				highlightStroke : "rgba(240,73,73,1)",
-				data : [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()]
+				data : randomData.data2
 			}
 		]
 	};
@@ -50,11 +68,15 @@
 		});
 
 		$('#randomizeData').click(function(){
-			barChartData.datasets[0].fillColor = 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',.7)';
-			barChartData.datasets[0].data = [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()];
+			randomizeData();
+			var tmpRgb = 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor();
+			barChartData.datasets[0].fillColor =  tmpRgb + ',.7)';
+			barChartData.datasets[0].strokeColor = tmpRgb + ',1)';
+			barChartData.datasets[0].data = randomData.data0;
+			barChartData.datasets[0].error = randomData.dataError;
 
 			barChartData.datasets[1].fillColor = 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',.7)';
-			barChartData.datasets[1].data = [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()];
+			barChartData.datasets[1].data = randomData.data1;
 
 			window.myBar.update();
 		});
