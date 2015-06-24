@@ -1,9 +1,19 @@
-(function(){
+(function (factory) {
+	"use strict";
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['chart.js'], factory);
+	} else if (typeof exports === 'object') {
+		// Node/CommonJS
+		module.exports = factory(require('chart.js'));
+	} else {
+		// Global browser
+		factory(Chart);
+	}
+}(function (Chart) {
 	"use strict";
 
-	var root = this,
-		Chart = root.Chart,
-		helpers = Chart.helpers;
+	var helpers = Chart.helpers;
 
 	var defaultConfig = {
 		scaleBeginAtZero : true,
@@ -45,7 +55,10 @@
 		totalColor: '#fff',
 
 		//String - Total Label
-		totalLabel: 'Total'
+		totalLabel: 'Total',
+
+		//Boolean - Hide labels with value set to 0
+		tooltipHideZero: false
 	};
 
 	Chart.Type.extend({
@@ -54,6 +67,9 @@
 		initialize:  function(data){
 			//Expose options as a scope variable here so we can access it in the ScaleClass
 			var options = this.options;
+
+			// Save data as a source for updating of values & methods
+			this.data = data;
 
 			this.ScaleClass = Chart.Scale.extend({
 				offsetGridLines : true,
@@ -148,19 +164,20 @@
 				this.datasets.push(datasetObject);
 
 				helpers.each(dataset.data,function(dataPoint,index){
-					if (helpers.isNumber(dataPoint)){
-						//Add a new point for each piece of data, passing any required data to draw.
-						//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip) 
-						datasetObject.bars.push(new this.BarClass({
-							value : helpers.isNumber(dataPoint)?dataPoint:0,
-							label : data.labels[index],
-							datasetLabel: dataset.label,
-							strokeColor : dataset.strokeColor,
-							fillColor : dataset.fillColor,
-							highlightFill : dataset.highlightFill || dataset.fillColor,
-							highlightStroke : dataset.highlightStroke || dataset.strokeColor
-						}));
+					if(!helpers.isNumber(dataPoint)){
+						dataPoint = 0;
 					}
+					//Add a new point for each piece of data, passing any required data to draw.
+					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
+					datasetObject.bars.push(new this.BarClass({
+						value : dataPoint,
+						label : data.labels[index],
+						datasetLabel: dataset.label,
+						strokeColor : dataset.strokeColor,
+						fillColor : dataset.fillColor,
+						highlightFill : dataset.highlightFill || dataset.fillColor,
+						highlightStroke : dataset.highlightStroke || dataset.strokeColor
+					}));
 				},this);
 
 			},this);
@@ -253,6 +270,10 @@
 						};
 
 						helpers.each(Elements, function(element) {
+							if (this.options.tooltipHideZero && element.value === 0) {
+								return;
+							}
+
 							xPositions.push(element.x);
 							yPositions.push(element.y);
 
@@ -337,6 +358,31 @@
 			return this;
 		},
 		update : function(){
+
+			//Iterate through each of the datasets, and build this into a property of the chart
+			helpers.each(this.data.datasets,function(dataset,datasetIndex){
+
+				helpers.extend(this.datasets[datasetIndex], {
+					label : dataset.label || null,
+					fillColor : dataset.fillColor,
+					strokeColor : dataset.strokeColor,
+				});
+
+				helpers.each(dataset.data,function(dataPoint,index){
+					helpers.extend(this.datasets[datasetIndex].bars[index], {
+						value : dataPoint,
+						label : this.data.labels[index],
+						datasetLabel: dataset.label,
+						strokeColor : dataset.strokeColor,
+						fillColor : dataset.fillColor,
+						highlightFill : dataset.highlightFill || dataset.fillColor,
+						highlightStroke : dataset.highlightStroke || dataset.strokeColor
+					});
+				},this);
+
+			},this);
+
+
 			this.scale.update();
 			// Reset any highlight colours before updating.
 			helpers.each(this.activeElements, function(activeElement){
@@ -442,7 +488,7 @@
 			helpers.each(valuesArray,function(value,datasetIndex){
 				if (helpers.isNumber(value)){
 					//Add a new point for each piece of data, passing any required data to draw.
-					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip) 
+					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
 					this.datasets[datasetIndex].bars.push(new this.BarClass({
 						value : helpers.isNumber(value)?value:0,
 						label : label,
@@ -494,15 +540,17 @@
 						height = this.scale.calculateBarHeight(this.datasets, datasetIndex, index, bar.value);
 
 					//Transition then draw
-					bar.transition({
-						base : this.scale.endPoint - (Math.abs(height) - Math.abs(y)),
-						x : this.scale.calculateBarX(index),
-						y : Math.abs(y),
-						height : Math.abs(height),
-						width : this.scale.calculateBarWidth(this.datasets.length)
-					}, easingDecimal).draw();
+					if(bar.value > 0) {
+						bar.transition({
+							base : this.scale.endPoint - (Math.abs(height) - Math.abs(y)),
+							x : this.scale.calculateBarX(index),
+							y : Math.abs(y),
+							height : Math.abs(height),
+							width : this.scale.calculateBarWidth(this.datasets.length)
+						}, easingDecimal).draw();
+					}
 				},this);
 			},this);
 		}
 	});
-}).call(this);
+}));
