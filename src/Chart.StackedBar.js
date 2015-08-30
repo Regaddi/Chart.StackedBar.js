@@ -360,7 +360,7 @@
 		update : function(){
 
 			//Iterate through each of the datasets, and build this into a property of the chart
-			helpers.each(this.data.datasets,function(dataset,datasetIndex){
+			helpers.each(this.datasets,function(dataset,datasetIndex){
 
 				helpers.extend(this.datasets[datasetIndex], {
 					label : dataset.label || null,
