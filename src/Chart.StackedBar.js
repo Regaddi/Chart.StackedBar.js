@@ -262,12 +262,22 @@
 							}
 						});
 
+						// Calculates the total of the bar, summing all elements values.
+						// It will be used when `showTotal` is `true`.
+						// It also will be useful for building template legends
+						// when `relativeBars` is `true`.
+						var sumOfValues = 0
+						helpers.each(Elements, function(element) { sumOfValues += element.value; });
+
 						var total = {
 							datasetLabel: this.options.totalLabel,
-							value: 0,
+							value: sumOfValues,
 							fillColor: this.options.totalColor,
 							strokeColor: this.options.totalColor
 						};
+
+						// Fill the `relativeValue` variable for relative charts
+						if (this.options.relativeBars) { total.relativeValue = 100 }
 
 						helpers.each(Elements, function(element) {
 							if (this.options.tooltipHideZero && element.value === 0) {
@@ -277,9 +287,17 @@
 							xPositions.push(element.x);
 							yPositions.push(element.y);
 
-							total.value += element.value;
+							// Include `relativeValue` variable to the element if `relativeBars` is enabled.
+							if (this.options.relativeBars) {
+								if (total.value == 0 || element.value == 0) {
+									element.relativeValue = 0
+								} else {
+									// We're not rouding up the percentage so it can be formatted
+									// with as much as decimal places as needed in the `multiTooltipTemplate`.
+									element.relativeValue = element.value / total.value * 100
+								}
+							}
 
-							//Include any colour information about the element
 							tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
 							tooltipColors.push({
 								fill: element._saved.fillColor || element.fillColor,
