@@ -277,7 +277,7 @@
 							xPositions.push(element.x);
 							yPositions.push(element.y);
 
-							total.value += element.value;
+							total.value += parseInt(element.value);
 
 							//Include any colour information about the element
 							tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
