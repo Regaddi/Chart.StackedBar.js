@@ -77,7 +77,10 @@ These are the customisation options specific to StackedBar charts. These options
 	{% endraw %}
 	
 	//Boolean - Hide labels with value set to 0
-	tooltipHideZero: false
+	tooltipHideZero: false,
+	
+	//Array - Labels that are rendered on the x axis, defaults to labels in data
+	xLabels: ["January", "February", "March", "April", "May", "June", "July"]
 }
 ```
 
