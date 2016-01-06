@@ -6,3 +6,5 @@ custom/*
 
 docs/index.md
 bower_components
+
+.idea
