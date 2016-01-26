@@ -1,5 +1,5 @@
 {
-  "name": "Chart.StackedBar.js",
+  "name": "chart-stackedbar-js",
   "homepage": "http://www.chartjs.org",
   "description": "StackedBar implementation for Chart.js",
   "version": "1.0.3",
