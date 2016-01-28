@@ -27,7 +27,7 @@
 		//Number - Width of the grid lines
 		scaleGridLineWidth : 1,
 
-        //Boolean - Whether to show horizontal lines (except X axis)
+		//Boolean - Whether to show horizontal lines (except X axis)
 		scaleShowHorizontalLines: true,
 
 		//Boolean - Whether to show vertical lines (except Y axis)
@@ -58,7 +58,16 @@
 		totalLabel: 'Total',
 
 		//Boolean - Hide labels with value set to 0
-		tooltipHideZero: false
+		tooltipHideZero: false,
+
+		//String - direction of the error bars. "Up", "down", or "both"
+		errorDir : "both",
+
+		//Number - stroke width of the error bars
+		errorStrokeWidth : 2,
+
+		//Number - ratio of the width of the error bar caps to the width of the bar
+		errorCapWidth : 0.75
 	};
 
 	Chart.Type.extend({
@@ -151,6 +160,16 @@
 				ctx : this.chart.ctx
 			});
 
+			if (typeof Chart.ErrorBar !== 'undefined') {
+				this.ErrorClass = Chart.ErrorBar.extend({
+					errorDir : this.options.errorDir,
+					errorStrokeWidth : this.options.errorStrokeWidth,
+					ctx : this.chart.ctx
+				});
+			} else {
+				this.ErrorClass = false;
+			}
+
 			//Iterate through each of the datasets, and build this into a property of the chart
 			helpers.each(data.datasets,function(dataset,datasetIndex){
 
@@ -167,10 +186,19 @@
 					if(!helpers.isNumber(dataPoint)){
 						dataPoint = 0;
 					}
+					if (typeof dataset.error !== 'undefined' && this.ErrorClass) {
+						var errorBar = new this.ErrorClass({
+							errorVal : dataset.error[index],
+							errorStrokeColor : dataset.errorStrokeColor || dataset.strokeColor
+						})
+					} else {
+						var errorBar = false;
+					}
 					//Add a new point for each piece of data, passing any required data to draw.
 					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
 					datasetObject.bars.push(new this.BarClass({
 						value : dataPoint,
+						errorBar : errorBar || false,
 						label : data.labels[index],
 						datasetLabel: dataset.label,
 						strokeColor : dataset.strokeColor,
@@ -193,6 +221,16 @@
 					y: this.scale.endPoint
 				});
 				bar.save();
+				if (bar.errorBar) {
+					helpers.extend(bar.errorBar, {
+						x : this.scale.calculateBarX(index),
+						y : this.scale.endPoint,
+						yDown : this.scale.endPoint,
+						yUp : this.scale.endPoint,
+						width: this.scale.calculateBarWidth(this.datasets.length) * this.options.errorCapWidth
+					});
+					bar.errorBar.save();
+				}
 			}, this);
 
 			this.render();
@@ -369,6 +407,12 @@
 				});
 
 				helpers.each(dataset.data,function(dataPoint,index){
+					if (this.datasets[datasetIndex].bars[index].errorBar) {
+						helpers.extend(this.datasets[datasetIndex].bars[index].errorBar, {
+							errorVal : dataset.error[index],
+							errorStrokeColor : dataset.errorStrokeColor || dataset.strokeColor
+						});
+					}
 					helpers.extend(this.datasets[datasetIndex].bars[index], {
 						value : dataPoint,
 						label : this.data.labels[index],
@@ -391,6 +435,9 @@
 
 			this.eachBars(function(bar){
 				bar.save();
+				if(bar.errorBar){
+					bar.errorBar.save();
+				}
 			});
 			this.render();
 		},
@@ -464,7 +511,7 @@
 				lineColor : this.options.scaleLineColor,
 				gridLineWidth : (this.options.scaleShowGridLines) ? this.options.scaleGridLineWidth : 0,
 				gridLineColor : (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
-                showHorizontalLines : this.options.scaleShowHorizontalLines,
+				showHorizontalLines : this.options.scaleShowHorizontalLines,
 				showVerticalLines : this.options.scaleShowVerticalLines,
 				padding : (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
 				showLabels : this.options.scaleShowLabels,
@@ -519,6 +566,12 @@
 				y: this.scale.endPoint,
 				base : this.scale.endPoint
 			});
+			helpers.extend(this.ErrorClass.prototype,{
+				y: this.scale.endPoint,
+				base : this.scale.endPoint,
+				yDown : this.scale.endPoint,
+				yUp : this.scale.endPoint
+			});
 			var newScaleProps = helpers.extend({
 				height : this.chart.height,
 				width : this.chart.width
@@ -548,9 +601,61 @@
 							height : Math.abs(height),
 							width : this.scale.calculateBarWidth(this.datasets.length)
 						}, easingDecimal).draw();
+						if (bar.errorBar && bar.errorBar.errorVal > 0) {
+							var yDown = this.scale.calculateBarY(this.datasets, datasetIndex, index, bar.value - bar.errorBar.errorVal);
+							var yUp = this.scale.calculateBarY(this.datasets, datasetIndex, index, bar.value + bar.errorBar.errorVal);
+							bar.errorBar.base = this.scale.endPoint;
+							var halfStrokeW = this.options.barStrokeWidth/2;
+							bar.errorBar.transition({
+								x : this.scale.calculateBarX(index),
+								y :  Math.abs(y)+halfStrokeW,
+								yDown : Math.abs(yDown)+halfStrokeW,
+								yUp : Math.abs(yUp)+halfStrokeW,
+								width: this.scale.calculateBarWidth(this.datasets.length) * this.options.errorCapWidth
+							}, easingDecimal).draw();
+						}
 					}
 				},this);
 			},this);
 		}
 	});
 }));
+
+(function() {
+	//add an error bar class to the basic chart elements
+	Chart.ErrorBar = Chart.Rectangle.extend({
+		draw : function() {
+			var ctx = this.ctx,
+				halfWidth = this.width/2,
+				leftX = this.x - halfWidth,
+				rightX = this.x + halfWidth,
+				top = this.base - (this.base - this.yUp),
+				bottom = this.base - (this.base - this.yDown),
+				middle = this.base - (this.base - this.y)
+			ctx.strokeStyle = this.errorStrokeColor;
+			ctx.lineWidth = this.errorStrokeWidth;
+			//draw upper error bar
+			if (this.errorDir != "down") {
+				ctx.beginPath();
+				ctx.moveTo(this.x, middle);
+				ctx.lineTo(this.x, top);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.moveTo(leftX, top);
+				ctx.lineTo(rightX, top);
+				ctx.stroke();
+			}
+			//draw lower error bar
+			if (this.errorDir != "up") {
+				ctx.beginPath();
+				ctx.moveTo(this.x, middle);
+				ctx.lineTo(this.x, bottom);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.moveTo(leftX, bottom);
+				ctx.lineTo(rightX, bottom);
+				ctx.stroke();
+			}
+		}
+	})
+}).call(this);
