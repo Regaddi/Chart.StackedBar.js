@@ -18,7 +18,18 @@
 	var randomColorFactor = function(){ return Math.round(Math.random()*255)};
 
 	var barChartData = {
-		labels : ["January","February","March","April","May","June","July"],
+		labels : [
+			{
+				name: "January",
+				additional: "Date 1"
+			},
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July"
+		],
 		datasets : [
 			{
 				fillColor : "rgba(220,220,220,0.5)",
@@ -39,14 +50,23 @@
 				strokeColor : "rgba(240,73,73,0.8)",
 				highlightFill : "rgba(240,73,73,0.75)",
 				highlightStroke : "rgba(240,73,73,1)",
-				data : [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()]
+				data : [
+					{y:randomScalingFactor(), data: 'Tooltip text'},
+					{y:randomScalingFactor(), data: 'Tooltip text'},
+					{y:randomScalingFactor(), data: 'Tooltip text'},
+					{y:randomScalingFactor(), data: 'Tooltip text'},
+					{y:randomScalingFactor(), data: 'Tooltip text'},
+					{y:randomScalingFactor(), data: 'Tooltip text'},
+					{y:randomScalingFactor(), data: 'Tooltip text'}
+				]
 			}
 		]
 	};
 	window.onload = function(){
 		var ctx = document.getElementById("canvas").getContext("2d");
 		window.myBar = new Chart(ctx).StackedBar(barChartData, {
-			responsive : true
+			responsive : true,
+			multiTooltipTemplate: "<% if(additionalLabel.length>0){ %><%= additionalLabel %><% }else{ %><%= label %><% } %> - <%= value %>"
 		});
 
 		$('#randomizeData').click(function(){
