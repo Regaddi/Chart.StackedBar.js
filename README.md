@@ -1,6 +1,10 @@
 Chart.StackedBar.js
 ===================
 
+**This repository is no longer maintained since [Chart.js v2.0](https://github.com/chartjs/Chart.js) includes StackedBars per default. I highly recommend you to upgrade your project using Chart.js to the latest version of Chart.js. Thank you all for your support, your contributions, your questions, answers and hints!**
+
+------
+
 *StackedBar plugin for Chart.js* [chartjs.org](http://www.chartjs.org)
 
 ## Documentation
