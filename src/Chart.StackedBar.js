@@ -164,14 +164,26 @@
 				this.datasets.push(datasetObject);
 
 				helpers.each(dataset.data,function(dataPoint,index){
-					if(!helpers.isNumber(dataPoint)){
+
+					var additionalLabel = '';
+					var label = data.labels[index];
+					if(!helpers.isNumber(dataPoint) && !helpers.isNumber(dataPoint.y)){
 						dataPoint = 0;
+					}
+					if (helpers.isNumber(dataPoint.y)) {
+						additionalLabel = dataPoint.data;
+						dataPoint = dataPoint.y;
+					}
+
+					if (typeof(label) !== 'string') {
+						label = label.additional;
 					}
 					//Add a new point for each piece of data, passing any required data to draw.
 					//Add 0 as value if !isNumber (e.g. empty values are useful when 0 values should be hidden in tooltip)
 					datasetObject.bars.push(new this.BarClass({
 						value : dataPoint,
-						label : data.labels[index],
+						label : label,
+						additionalLabel: additionalLabel,
 						datasetLabel: dataset.label,
 						strokeColor : dataset.strokeColor,
 						fillColor : dataset.fillColor,
@@ -435,6 +447,12 @@
 				});
 				return values;
 			};
+
+			for (var i = 0; i < labels.length; i++) {
+				if (typeof(labels[i]) !== 'string') {
+					labels[i] =labels[i].name;
+				}
+			}
 
 			var scaleOptions = {
 				templateString : this.options.scaleLabel,
