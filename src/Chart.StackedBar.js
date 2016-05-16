@@ -279,12 +279,14 @@
 
 							total.value += element.value;
 
-							//Include any colour information about the element
-							tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
-							tooltipColors.push({
-								fill: element._saved.fillColor || element.fillColor,
-								stroke: element._saved.strokeColor || element.strokeColor
-							});
+							//Include any colour information about the element(s)
+							if (element.value !== 0) {
+								tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
+								tooltipColors.push({
+									fill: element._saved.fillColor || element.fillColor,
+									stroke: element._saved.strokeColor || element.strokeColor
+								});
+							}
 
 						}, this);
 
