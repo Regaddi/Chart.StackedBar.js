@@ -15,18 +15,18 @@
 
   var helpers = Chart.helpers;
 
-  function drawLine(ctx, point, scale, annotation) {
+  function drawLine(ctx, scale, annotation) {
     ctx.beginPath();
-    ctx.moveTo(point.x, scale.startPoint);
+    ctx.moveTo(scale.calculateBarX(annotation.value), scale.startPoint);
     ctx.strokeStyle = annotation.lineColor;
-    ctx.lineTo(point.x, scale.endPoint);
+    ctx.lineTo(scale.calculateBarX(annotation.value), scale.endPoint);
     ctx.stroke();
   }
 
-  function drawLabel(ctx, point, scale, annotation) {
+  function drawLabel(ctx, scale, annotation) {
     ctx.textAlign = 'left';
     ctx.fillStyle = annotation.labelColor;
-    ctx.fillText(annotation.labelText, point.x, scale.startPoint - 5);
+    ctx.fillText(annotation.labelText, scale.calculateBarX(annotation.value), scale.startPoint - 5);
   }
 
   function drawAnnotations(chartType) {
@@ -34,13 +34,13 @@
     var datasets = chartType.datasets;
     var scale = chartType.scale;
     var ctx = chartType.chart.ctx;
+
     helpers.each(annotations, function (annotation) {
       if (annotation.type !== 'line') return;
 
       helpers.each(datasets, function (dataset) {
-        var point = dataset.bars[annotation.value];
-        drawLine(ctx, point, scale, annotation);
-        drawLabel(ctx, point, scale, annotation);
+        drawLine(ctx, scale, annotation);
+        drawLabel(ctx, scale, annotation);
       });
     });
   }
