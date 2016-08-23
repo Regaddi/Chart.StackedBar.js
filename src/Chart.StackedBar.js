@@ -13,7 +13,37 @@
 }(function (Chart) {
 	"use strict";
 
-	var helpers = Chart.helpers;
+  var helpers = Chart.helpers;
+
+  function drawLine(ctx, point, scale, annotation) {
+    ctx.beginPath();
+    ctx.moveTo(point.x, scale.startPoint);
+    ctx.strokeStyle = annotation.lineColor;
+    ctx.lineTo(point.x, scale.endPoint);
+    ctx.stroke();
+  }
+
+  function drawLabel(ctx, point, scale, annotation) {
+    ctx.textAlign = 'left';
+    ctx.fillStyle = annotation.labelColor;
+    ctx.fillText(annotation.labelText, point.x, scale.startPoint - 5);
+  }
+
+  function drawAnnotations(chartType) {
+    var annotations = chartType.options.annotation ? chartType.options.annotation.annotations : [];
+    var datasets = chartType.datasets;
+    var scale = chartType.scale;
+    var ctx = chartType.chart.ctx;
+    helpers.each(annotations, function (annotation) {
+      if (annotation.type !== 'line') return;
+
+      helpers.each(datasets, function (dataset) {
+        var point = dataset.bars[annotation.value];
+        drawLine(ctx, point, scale, annotation);
+        drawLabel(ctx, point, scale, annotation);
+      });
+    });
+  }
 
 	var defaultConfig = {
 		scaleBeginAtZero : true,
@@ -533,7 +563,9 @@
 
 			var ctx = this.chart.ctx;
 
-			this.scale.draw(easingDecimal);
+      this.scale.draw(easingDecimal);
+
+      drawAnnotations(this);
 
 			//Draw all the bars for each dataset
 			helpers.each(this.datasets,function(dataset,datasetIndex){
