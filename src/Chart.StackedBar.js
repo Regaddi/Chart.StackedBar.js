@@ -308,6 +308,13 @@
 						};
 					}).call(this, dataIndex);
 
+					var tooltipLabelsToShow = [];
+					var sumSoFar = 0;
+					tooltipLabels.reverse().forEach(function(currVal) {
+						sumSoFar += parseInt(currVal);
+						tooltipLabelsToShow.push('' + sumSoFar);
+					});
+
 					new Chart.MultiTooltip({
 						x: medianPosition.x,
 						y: medianPosition.y,
@@ -324,7 +331,7 @@
 						titleFontStyle: this.options.tooltipTitleFontStyle,
 						titleFontSize: this.options.tooltipTitleFontSize,
 						cornerRadius: this.options.tooltipCornerRadius,
-						labels: tooltipLabels,
+						labels: tooltipLabelsToShow,
 						legendColors: tooltipColors,
 						legendColorBackground : this.options.multiTooltipKeyBackground,
 						title: ChartElements[0].label,
